@@ -16,8 +16,16 @@
         <h1 class="app-title">项目管理</h1>
         <p class="app-subtitle">Project Workspace</p>
       </div>
+      <div class="view-toggle" role="tablist" aria-label="主功能切换">
+        <button class="view-toggle__btn is-active" data-view="workspace" role="tab" aria-selected="true">
+          协作工作台
+        </button>
+        <button class="view-toggle__btn" data-view="members" role="tab" aria-selected="false">
+          成员管理
+        </button>
+      </div>
       <div class="search-box">
-        <input type="search" id="nav-search" placeholder="快速筛选..." />
+        <input type="search" id="nav-search" placeholder="快速筛选..." aria-label="侧边栏搜索" />
       </div>
       <nav class="nav-tree" id="nav-tree">
         <!-- Tree populated by script.js -->

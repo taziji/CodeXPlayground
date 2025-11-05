@@ -3,9 +3,14 @@ const sectionTitleEl = document.getElementById('section-title');
 const sectionDescriptionEl = document.getElementById('section-description');
 const sectionBodyEl = document.getElementById('section-body');
 const navSearchEl = document.getElementById('nav-search');
+const viewToggleButtons = document.querySelectorAll('.view-toggle__btn');
 const newAssetBtn = document.getElementById('new-asset-btn');
 const assignBtn = document.getElementById('assign-btn');
 const uploadBtn = document.getElementById('upload-btn');
+
+let currentView = null;
+let activeWorkspaceSectionId = 'project-overview';
+let activeOrgUnitId = null;
 
 const icons = {
   info: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
@@ -15,7 +20,10 @@ const icons = {
   finance: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 21V9"/><path d="m9 21 9-12 9 12"/><path d="M2 21h6"/><path d="M5 21V3"/></svg>`,
   training: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-5 7-5 7 5-7 5"/><path d="M5 14v7"/><path d="M19 14v7"/><path d="M12 4v4"/></svg>`,
   media: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m10 9 5 3-5 3z"/></svg>`,
-  tasks: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21h10"/><path d="M5 3h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 7h6"/><path d="M9 11h6"/><path d="M9 15h4"/></svg>`
+  tasks: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 21h10"/><path d="M5 3h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9 7h6"/><path d="M9 11h6"/><path d="M9 15h4"/></svg>`,
+  org: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5V3a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v2"/><path d="M4 13v-2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M4 5h8"/><path d="M12 7H4"/><path d="M20 21v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v2"/><path d="M12 13h8"/><path d="M20 15h-8"/></svg>`,
+  kpi: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-5"/></svg>`,
+  alert: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m10.29 3.86-7 12A1 1 0 0 0 4.18 17h15.64a1 1 0 0 0 .89-1.5l-7-12a1 1 0 0 0-1.74 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
 };
 
 const workspaceSections = [
@@ -247,6 +255,125 @@ const workspaceSections = [
   }
 ];
 
+const memberPortal = {
+  title: '成员管理门户',
+  description: '集中掌握项目分配、成员信息与组织健康度，助力快速响应协作需求。',
+  projects: [
+    { id: 'project-supply', label: '智慧供应链协同', owner: '刘畅', timeline: 'Q3 里程碑' },
+    { id: 'project-insight', label: '商业洞察平台', owner: '王薇', timeline: '双周迭代' },
+    { id: 'project-growth', label: '渠道增长实验', owner: '贺曼', timeline: '增长冲刺' },
+    { id: 'project-compliance', label: '合规流程优化', owner: '赵涛', timeline: '阶段验收' }
+  ],
+  members: [
+    {
+      id: 'member-liu-chang',
+      name: '刘畅',
+      role: '项目总监',
+      email: 'liu.chang@acme.cn',
+      department: '战略协同组',
+      company: 'GSK Pharma',
+      assignedProjects: ['project-supply', 'project-insight'],
+      tags: ['产品', '核心成员']
+    },
+    {
+      id: 'member-wang-wei',
+      name: '王薇',
+      role: '产品负责人',
+      email: 'wang.wei@acme.cn',
+      department: '商业创新中心',
+      company: 'GSK Digital',
+      assignedProjects: ['project-insight', 'project-growth'],
+      tags: ['产品']
+    },
+    {
+      id: 'member-cheng-hao',
+      name: '程浩',
+      role: '高级产品经理',
+      email: 'cheng.hao@acme.cn',
+      department: '体验策略组',
+      company: 'GSK Digital',
+      assignedProjects: ['project-insight'],
+      tags: ['产品', '体验']
+    },
+    {
+      id: 'member-lin-zhou',
+      name: '林舟',
+      role: '需求分析主管',
+      email: 'lin.zhou@acme.cn',
+      department: '数据治理组',
+      company: 'GSK Digital',
+      assignedProjects: ['project-compliance'],
+      tags: ['数据', '流程']
+    },
+    {
+      id: 'member-zhao-tao',
+      name: '赵涛',
+      role: '技术总监',
+      email: 'zhao.tao@acme.cn',
+      department: '平台工程部',
+      company: 'GSK Tech Center',
+      assignedProjects: ['project-supply', 'project-compliance'],
+      tags: ['技术', '核心成员']
+    },
+    {
+      id: 'member-huang-min',
+      name: '黄敏',
+      role: '平台研发负责人',
+      email: 'huang.min@acme.cn',
+      department: '平台工程部',
+      company: 'GSK Tech Center',
+      assignedProjects: ['project-compliance'],
+      tags: ['技术']
+    },
+    {
+      id: 'member-lv-sen',
+      name: '吕森',
+      role: '交付经理',
+      email: 'lv.sen@acme.cn',
+      department: '交付保障组',
+      company: 'GSK Tech Center',
+      assignedProjects: ['project-supply'],
+      tags: ['交付']
+    },
+    {
+      id: 'member-he-man',
+      name: '贺曼',
+      role: '运营负责人',
+      email: 'he.man@acme.cn',
+      department: '增长策略组',
+      company: 'GSK Growth Lab',
+      assignedProjects: ['project-growth'],
+      tags: ['市场', '核心成员']
+    },
+    {
+      id: 'member-su-yan',
+      name: '苏燕',
+      role: '增长运营',
+      email: 'su.yan@acme.cn',
+      department: '渠道运营组',
+      company: '外部合作伙伴',
+      assignedProjects: ['project-growth'],
+      tags: ['市场', '外部协作']
+    },
+    {
+      id: 'member-tang-yu',
+      name: '唐瑜',
+      role: '数据分析师',
+      email: 'tang.yu@acme.cn',
+      department: '商业分析组',
+      company: 'GSK Analytics',
+      assignedProjects: ['project-insight', 'project-growth'],
+      tags: ['数据']
+    }
+  ]
+};
+
+const memberFiltersState = {
+  search: ''
+};
+
+let memberOrgTree = [];
+
 const colorPalette = ['#2563eb', '#db2777', '#16a34a', '#f97316', '#7c3aed', '#0d9488'];
 
 function createAvatar(initials, index) {
@@ -330,7 +457,7 @@ function renderAssets(assets) {
   return grid;
 }
 
-function renderSection(section) {
+function renderWorkspaceSection(section) {
   sectionTitleEl.textContent = section.label;
   sectionDescriptionEl.textContent = section.description;
   sectionBodyEl.innerHTML = '';
@@ -372,7 +499,7 @@ function renderSection(section) {
       card.querySelector('.asset-card__cta').addEventListener('click', () => {
         const childSection = section.children?.find((item) => item.id === child.id);
         if (childSection) {
-          activateSection(childSection.id);
+          activateWorkspaceSection(childSection.id);
         }
       });
 
@@ -387,7 +514,7 @@ function renderSection(section) {
   }
 }
 
-function buildNavItem(section, depth = 0) {
+function buildWorkspaceNavItem(section, depth = 0) {
   const node = document.createElement('div');
   node.className = 'tree-node';
 
@@ -413,7 +540,7 @@ function buildNavItem(section, depth = 0) {
   trigger.appendChild(labelWrapper);
 
   trigger.addEventListener('click', () => {
-    activateSection(section.id);
+    activateWorkspaceSection(section.id);
   });
 
   node.appendChild(trigger);
@@ -422,7 +549,7 @@ function buildNavItem(section, depth = 0) {
     const childContainer = document.createElement('div');
     childContainer.className = 'child-list';
     section.children.forEach((child) => {
-      const childItem = buildNavItem(child, depth + 1);
+      const childItem = buildWorkspaceNavItem(child, depth + 1);
       childContainer.appendChild(childItem);
     });
     node.appendChild(childContainer);
@@ -431,35 +558,322 @@ function buildNavItem(section, depth = 0) {
   return node;
 }
 
-function renderNavTree(sections) {
+function renderWorkspaceNavTree(sections) {
   navTreeEl.innerHTML = '';
   sections.forEach((section) => {
-    navTreeEl.appendChild(buildNavItem(section));
+    navTreeEl.appendChild(buildWorkspaceNavItem(section));
   });
 }
 
-function activateSection(sectionId) {
-  const targetSection = findSection(sectionId, workspaceSections);
+function activateWorkspaceSection(sectionId) {
+  const targetSection = findWorkspaceSection(sectionId, workspaceSections);
   if (!targetSection) return;
+
+  activeWorkspaceSectionId = sectionId;
 
   [...navTreeEl.querySelectorAll('.tree-item')].forEach((item) => {
     item.classList.toggle('is-active', item.dataset.sectionId === sectionId);
   });
 
-  renderSection(targetSection);
+  renderWorkspaceSection(targetSection);
 }
 
-function findSection(sectionId, sections) {
+function findWorkspaceSection(sectionId, sections) {
   for (const section of sections) {
     if (section.id === sectionId) return section;
     if (section.children) {
-      const found = findSection(sectionId, section.children);
+      const found = findWorkspaceSection(sectionId, section.children);
       if (found) return found;
     }
   }
   return null;
 }
 
+
+function getProjectById(projectId) {
+  return memberPortal.projects.find((project) => project.id === projectId) || null;
+}
+
+function buildMemberOrgTree() {
+  const root = {
+    id: 'gsk-projects',
+    label: 'GSK Projects',
+    type: 'group',
+    searchText: 'GSK Projects',
+    children: memberPortal.projects.map((project) => {
+      const memberIds = memberPortal.members
+        .filter((member) => member.assignedProjects.includes(project.id))
+        .map((member) => member.id);
+      return {
+        id: project.id,
+        label: project.label,
+        type: 'project',
+        owner: project.owner,
+        timeline: project.timeline,
+        memberIds,
+        searchText: `${project.label} ${project.owner} ${project.timeline}`,
+        children: memberIds.map((memberId) => {
+          const member = memberPortal.members.find((item) => item.id === memberId);
+          return {
+            id: `${project.id}::${memberId}`,
+            label: member?.name || '未匹配成员',
+            type: 'member',
+            role: member?.role || '',
+            searchText: `${member?.name || ''} ${member?.role || ''} ${project.label}`
+          };
+        })
+      };
+    })
+  };
+
+  memberOrgTree = [root];
+}
+
+function buildOrgNavItem(unit, depth = 0) {
+  const node = document.createElement('div');
+  node.className = 'tree-node';
+  node.style.setProperty('--depth', depth);
+
+  const isLeaf = unit.type === 'member';
+  const trigger = document.createElement(isLeaf ? 'div' : 'button');
+  trigger.className = 'tree-item tree-item--org';
+  trigger.dataset.searchText = unit.searchText || unit.label;
+  trigger.style.paddingLeft = `${12 + depth * 18}px`;
+
+  if (!isLeaf) {
+    trigger.type = 'button';
+    trigger.dataset.orgId = unit.id;
+    if (unit.id === activeOrgUnitId) {
+      trigger.classList.add('is-active');
+    }
+    trigger.addEventListener('click', () => {
+      activateOrgUnit(unit.id);
+    });
+  } else {
+    trigger.classList.add('tree-item--leaf');
+  }
+
+  const labelWrapper = document.createElement('div');
+  labelWrapper.className = 'tree-item__label';
+
+  const iconWrapper = document.createElement('span');
+  const iconKey = unit.type === 'project' ? 'tasks' : 'org';
+  iconWrapper.innerHTML = icons[iconKey] || icons.org;
+  const iconElement = iconWrapper.firstElementChild;
+  if (iconElement) {
+    labelWrapper.appendChild(iconElement);
+  }
+
+  const label = document.createElement('span');
+  label.textContent = unit.label;
+  labelWrapper.appendChild(label);
+  trigger.appendChild(labelWrapper);
+
+  if (unit.type === 'group') {
+    const meta = document.createElement('div');
+    meta.className = 'tree-item__meta';
+    meta.innerHTML = `<span>${unit.children?.length || 0} 个项目</span>`;
+    trigger.appendChild(meta);
+  }
+
+  if (unit.type === 'project') {
+    const meta = document.createElement('div');
+    meta.className = 'tree-item__meta';
+    meta.innerHTML = `<span>${unit.memberIds.length} 人</span><span>${unit.timeline}</span>`;
+
+    const hint = document.createElement('span');
+    hint.className = 'tree-item__hint';
+    hint.textContent = `负责人 ${unit.owner}`;
+
+    const details = document.createElement('div');
+    details.className = 'tree-item__details';
+    details.appendChild(meta);
+    details.appendChild(hint);
+    trigger.appendChild(details);
+  }
+
+  if (unit.type === 'member') {
+    const hint = document.createElement('span');
+    hint.className = 'tree-item__hint';
+    hint.textContent = unit.role;
+    trigger.appendChild(hint);
+  }
+
+  node.appendChild(trigger);
+
+  if (unit.children && unit.children.length) {
+    const childContainer = document.createElement('div');
+    childContainer.className = 'child-list';
+    unit.children.forEach((child) => {
+      childContainer.appendChild(buildOrgNavItem(child, depth + 1));
+    });
+    node.appendChild(childContainer);
+  }
+
+  return node;
+}
+
+function renderMemberNavTree() {
+  buildMemberOrgTree();
+  navTreeEl.innerHTML = '';
+  memberOrgTree.forEach((unit) => {
+    navTreeEl.appendChild(buildOrgNavItem(unit));
+  });
+}
+
+function findOrgUnit(orgId, units) {
+  for (const unit of units) {
+    if (unit.id === orgId) return unit;
+    if (unit.children) {
+      const found = findOrgUnit(orgId, unit.children);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
+function activateOrgUnit(orgId) {
+  activeOrgUnitId = orgId;
+  [...navTreeEl.querySelectorAll('.tree-item')].forEach((item) => {
+    const shouldActivate = item.dataset.orgId === orgId;
+    item.classList.toggle('is-active', shouldActivate);
+  });
+  renderMemberPortal();
+}
+
+function applyMemberFilters() {
+  const searchKeyword = memberFiltersState.search.trim().toLowerCase();
+
+  return memberPortal.members.filter((member) => {
+    if (
+      activeOrgUnitId &&
+      activeOrgUnitId !== 'gsk-projects' &&
+      !member.assignedProjects.includes(activeOrgUnitId)
+    ) {
+      return false;
+    }
+
+    if (searchKeyword) {
+      const projectNames = member.assignedProjects
+        .map((projectId) => getProjectById(projectId)?.label || projectId)
+        .join(' ');
+      const haystack = `${member.name} ${member.role} ${member.email} ${member.department} ${member.company} ${projectNames}`.toLowerCase();
+      if (!haystack.includes(searchKeyword)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+}
+
+function renderMemberPortal() {
+  if (!memberOrgTree.length) {
+    buildMemberOrgTree();
+  }
+
+  const activeUnit = activeOrgUnitId ? findOrgUnit(activeOrgUnitId, memberOrgTree) : null;
+  let focusDescription = memberPortal.description;
+
+  if (activeUnit) {
+    if (activeUnit.type === 'project') {
+      focusDescription = `${memberPortal.description} 当前聚焦项目：${activeUnit.label}（${activeUnit.memberIds.length} 名成员 · ${activeUnit.timeline}）。`;
+    } else if (activeUnit.type === 'group') {
+      focusDescription = `${memberPortal.description} 当前聚焦：${activeUnit.label}。`;
+    }
+  }
+
+  sectionTitleEl.textContent = memberPortal.title;
+  sectionDescriptionEl.textContent = focusDescription;
+  sectionBodyEl.innerHTML = '';
+
+  const controls = document.createElement('div');
+  controls.className = 'member-controls';
+
+  const searchWrapper = document.createElement('div');
+  searchWrapper.className = 'member-controls__search';
+  const searchInput = document.createElement('input');
+  searchInput.type = 'search';
+  searchInput.placeholder = '搜索姓名、邮箱或角色';
+  searchInput.value = memberFiltersState.search;
+  searchInput.addEventListener('input', (event) => {
+    memberFiltersState.search = event.target.value;
+    renderMemberPortal();
+  });
+  searchWrapper.appendChild(searchInput);
+  controls.appendChild(searchWrapper);
+
+  sectionBodyEl.appendChild(controls);
+
+  const filteredMembers = applyMemberFilters();
+
+  if (!filteredMembers.length) {
+    const emptyState = document.createElement('div');
+    emptyState.className = 'placeholder';
+    emptyState.innerHTML = '<p>暂无符合条件的成员，尝试调整搜索词或切换项目。</p>';
+    sectionBodyEl.appendChild(emptyState);
+    return;
+  }
+
+  const table = document.createElement('div');
+  table.className = 'member-table';
+
+  const tableHeader = document.createElement('div');
+  tableHeader.className = 'member-table__header';
+  tableHeader.innerHTML = `
+    <span>成员</span>
+    <span>指派项目</span>
+    <span>所属公司</span>
+    <span class="member-table__header-actions">操作</span>
+  `;
+  table.appendChild(tableHeader);
+
+  const tableBody = document.createElement('div');
+  tableBody.className = 'member-table__body';
+
+  filteredMembers.forEach((member) => {
+    const assignments = member.assignedProjects || [];
+    const projectNames = assignments
+      .map((projectId) => getProjectById(projectId)?.label || projectId)
+      .map((name) => `<span class="member-project">${name}</span>`)
+      .join('');
+
+    const row = document.createElement('article');
+    row.className = 'member-row';
+    row.innerHTML = `
+      <div class="member-row__primary">
+        <div class="member-row__avatar">${member.name.slice(0, 1)}</div>
+        <div class="member-row__meta">
+          <div class="member-row__name">${member.name}</div>
+          <div class="member-row__role">${member.role} · ${member.department}</div>
+          <div class="member-row__contact">${member.email}</div>
+          <div class="member-row__tags">
+            ${(member.tags || []).map((tag) => `<span class="member-tag">${tag}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+      <div class="member-row__projects">${projectNames || '<span class="member-project">待分配</span>'}</div>
+      <div class="member-row__company">${member.company}</div>
+      <div class="member-row__actions">
+        <button type="button" class="member-row__btn" data-action="edit" data-member="${member.id}">编辑</button>
+      </div>
+    `;
+
+    tableBody.appendChild(row);
+  });
+
+  table.appendChild(tableBody);
+  sectionBodyEl.appendChild(table);
+
+  tableBody.querySelectorAll('.member-row__btn').forEach((button) => {
+    button.addEventListener('click', (event) => {
+      const memberId = event.currentTarget.dataset.member;
+      const member = memberPortal.members.find((item) => item.id === memberId);
+      if (!member) return;
+      window.alert(`编辑 ${member.name}：更新基本信息、项目分配与公司属性。`);
+    });
+  });
+}
 function filterNav(keyword) {
   const trimmed = keyword.trim().toLowerCase();
   const nodes = Array.from(navTreeEl.querySelectorAll('.tree-node'));
@@ -477,7 +891,7 @@ function filterNav(keyword) {
 
   nodes.forEach((node) => {
     const trigger = node.firstElementChild;
-    const text = trigger?.textContent || '';
+    const text = trigger?.dataset.searchText || trigger?.textContent || '';
     if (text.toLowerCase().includes(trimmed)) {
       node.dataset.match = 'true';
       let parent = node.parentElement?.closest('.tree-node');
@@ -493,23 +907,87 @@ function filterNav(keyword) {
   });
 }
 
+function updateActionButtons() {
+  if (currentView === 'members') {
+    newAssetBtn.textContent = '+ 邀请成员';
+    assignBtn.textContent = '批量调配项目';
+    uploadBtn.textContent = '导出名册';
+  } else {
+    newAssetBtn.textContent = '+ 新建资产';
+    assignBtn.textContent = '指派成员';
+    uploadBtn.textContent = '上传资产';
+  }
+}
+
+function setView(view) {
+  currentView = view;
+
+  viewToggleButtons.forEach((button) => {
+    const isActive = button.dataset.view === view;
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-selected', String(isActive));
+  });
+
+  navSearchEl.value = '';
+
+  if (view === 'workspace') {
+    navSearchEl.placeholder = '快速筛选...';
+    renderWorkspaceNavTree(workspaceSections);
+    if (!findWorkspaceSection(activeWorkspaceSectionId, workspaceSections)) {
+      activeWorkspaceSectionId = workspaceSections[0].id;
+    }
+    activateWorkspaceSection(activeWorkspaceSectionId);
+  } else {
+    navSearchEl.placeholder = '搜索项目或成员';
+    renderMemberNavTree();
+    const hasActive = activeOrgUnitId && findOrgUnit(activeOrgUnitId, memberOrgTree);
+    if (hasActive) {
+      activateOrgUnit(activeOrgUnitId);
+    } else if (memberOrgTree.length) {
+      activateOrgUnit(memberOrgTree[0].id);
+    } else {
+      renderMemberPortal();
+    }
+  }
+
+  updateActionButtons();
+}
+
+viewToggleButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const view = button.dataset.view;
+    if (view) {
+      setView(view);
+    }
+  });
+});
+
 navSearchEl.addEventListener('input', (event) => {
   filterNav(event.target.value);
 });
 
 newAssetBtn.addEventListener('click', () => {
-  window.alert('此处可唤起新建资产弹窗：选择模板、指派协作成员、设定到期时间。');
+  if (currentView === 'members') {
+    window.alert('邀请成员：填写基本信息、绑定项目并同步欢迎包。');
+  } else {
+    window.alert('此处可唤起新建资产弹窗：选择模板、指派协作成员、设定到期时间。');
+  }
 });
 
 assignBtn.addEventListener('click', () => {
-  window.alert('快速指派成员：选择角色、设置截止时间并同步到任务清单。');
+  if (currentView === 'members') {
+    window.alert('批量调配项目：选择成员、快速调整项目指派并同步给相关负责人。');
+  } else {
+    window.alert('快速指派成员：选择角色、设置截止时间并同步到任务清单。');
+  }
 });
 
 uploadBtn.addEventListener('click', () => {
-  window.alert('上传资产：支持文档、图片、视频等多格式，自动沉淀到对应模块。');
+  if (currentView === 'members') {
+    window.alert('导出名册：生成包含项目分配与公司信息的成员列表。');
+  } else {
+    window.alert('上传资产：支持文档、图片、视频等多格式，自动沉淀到对应模块。');
+  }
 });
 
-renderNavTree(workspaceSections);
-
-// 默认激活第一个节点
-activateSection(workspaceSections[0].id);
+setView('workspace');
