@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Collaboration Workspace</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar__header">
+        <h1 class="app-title">项目管理</h1>
+        <p class="app-subtitle">Project Workspace</p>
+      </div>
+      <div class="search-box">
+        <input type="search" id="nav-search" placeholder="快速筛选..." />
+      </div>
+      <nav class="nav-tree" id="nav-tree">
+        <!-- Tree populated by script.js -->
+      </nav>
+      <button class="cta-button" id="new-asset-btn">+ 新建资产</button>
+    </aside>
+    <main class="content-area">
+      <header class="content-header">
+        <div>
+          <h2 id="section-title">请选择左侧目录</h2>
+          <p id="section-description" class="section-description">聚合项目信息、协作协议、培训素材和任务安排，提升跨团队协同效率。</p>
+        </div>
+        <div class="content-actions">
+          <button class="action-button" id="assign-btn">指派成员</button>
+          <button class="action-button action-button--primary" id="upload-btn">上传资产</button>
+        </div>
+      </header>
+      <section class="section-body" id="section-body">
+        <div class="placeholder">
+          <img src="https://illustrations.popsy.co/gray/project-launch.svg" alt="Project illustration" />
+          <p>选择一个节点以查看或编辑相关资产与协作资料。</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <template id="asset-card-template">
+    <article class="asset-card">
+      <header class="asset-card__header">
+        <div class="asset-card__meta">
+          <span class="asset-card__tag"></span>
+          <span class="asset-card__updated"></span>
+        </div>
+        <button class="asset-card__more" aria-label="更多操作">⋮</button>
+      </header>
+      <h3 class="asset-card__title"></h3>
+      <p class="asset-card__description"></p>
+      <footer class="asset-card__footer">
+        <div class="asset-card__avatars"></div>
+        <button class="asset-card__cta">打开</button>
+      </footer>
+    </article>
+  </template>
+  <script src="script.js"></script>
+</body>
+</html>
